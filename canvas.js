@@ -45,24 +45,36 @@ function saveDrawingToString() {
 
   for (var i = 0; i < blocksArray.length; i++){
     var s = "";
-    s += blocksArray[i].x + ",";
-    s += blocksArray[i].y + ",";
-    s += blocksArray[i].scale + "--";
+
+    if (i === blocksArray.length - 1) {
+      s += blocksArray[i].x + ",";
+      s += blocksArray[i].y + ",";
+      s += blocksArray[i].scale;
+    } else {
+      s += blocksArray[i].x + ",";
+      s += blocksArray[i].y + ",";
+      s += blocksArray[i].scale + "--";
+    }
     temp.push(s);
   }
-  copyDiv.value(temp.join(''));
+  // console.log(temp);
+  // console.log(temp.join('').split('--'));
+  copyDiv.value(btoa(temp.join('')));
+
 }
 
 function setNewDrawing() {
   try {
-    var newDrawingString = copyDiv.value();
-    for (var i = blocksArray.length - 1; i >= 0; i--) {
-      blocksArray.splice(i, 1);
-    }
+    var newDrawingString = atob(copyDiv.value());
+    // for (var i = blocksArray.length - 1; i >= 0; i--) {
+    //   blocksArray.splice(0, 1);
+    // }
     var temp = newDrawingString.split('--');
+    console.log(temp);
     for (var i = 0; i < temp.length; i++){
       var sections = temp[i].split(',');
-      blocksArray.push(new Block(sections[0], sections[1], sections[2], color(random(255),random(255),random(255))));
+      console.log(sections);
+      blocksArray.push(new Block(parseInt(sections[0]), parseInt(sections[1]), parseInt(sections[2]), color(random(255),random(255),random(255))));
     }
   } catch(err){
     copyDiv.value("Oh no! Something went wrong! you fucked it ;d");
@@ -131,6 +143,7 @@ function draw() {
             mouseY < slider.position().y + (slider.size().height * 1.5)) {
             spaceIsAlreadyOccupied = true;
         }
+
         if (!spaceIsAlreadyOccupied) {
             blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
             // console.log(y);
