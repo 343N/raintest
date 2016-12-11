@@ -26,7 +26,7 @@ function setup() {
     copyDiv.style('font-family','sans-serif')
     copyDiv.mousePressed(saveDrawingToString);
     copyDiv.changed(setNewDrawing);
-    copyDiv.value('Click me to generate a link of your drawing. Paste text in me from other people, then press enter to view their drawings!');
+    copyDiv.value('Click me to generate a link of your drawing. Paste text in me from other people, then press enter to view their drawings or clear your own!');
 
 
     createCanvas(sizeX, sizeY - 32);
@@ -121,10 +121,8 @@ function draw() {
         for (var i = 0; i < blocksArray.length; i++) {
             if (blocksArray[i].x == x && blocksArray[i].y == y) {
                 spaceIsAlreadyOccupied = true;
+                break;
             }
-        }
-        if (mouseY < 64) {
-          spaceIsAlreadyOccupied = true;
         }
         if (mouseX > gravitySlider.position().x &&
             mouseX < gravitySlider.position().x + gravitySlider.size().width &&
