@@ -6,33 +6,57 @@ function Raindrop() {
     this.x = random((-sizeX * 0.25), sizeX * 1.25);
     this.y = random(-sizeY);
     this.fallspeed = random(5, 50);
-    this.length = random(15, 20);
+    this.length = random(-15, -20);
     wind = 0;
     gravity = .1;
+    this.collided = false;
     // stroke(random(255),random(255),random(255));
 
 
     this.fall = function() {
+        this.collided = false;
+        this.prevX = this.x;
+        this.prevY = this.y;
         this.y = this.y + this.fallspeed;
         this.x = this.x + ((wind / this.length) * this.fallspeed);
+        // this.xDiff = this.x - this.prevX;
+        // this.yDiff = this.y - this.prevY;
         this.fallspeed += gravity;
         if (this.y > sizeY) {
             this.collide(this.x, sizeY);
         }
         for (var i = 0; i < blocksArray.length; i++) {
-            if (this.x > blocksArray[i].x &&
-                this.x < blocksArray[i].x + blocksArray[i].scale &&
-                this.y > blocksArray[i].y &&
-                this.y < blocksArray[i].y + blocksArray[i].scale) {
-                this.collide(this.x, blocksArray[i].y);
-                console.log("collided!")
+            for (var j = 0; j * blocksArray[i].scale + this.prevY < this.y; j++) {
+                if (j * blocksArray[i].scale + this.prevY > blocksArray[i].y &&
+                    j * blocksArray[i].scale + this.prevY < blocksArray[i].y + blocksArray[i].scale &&
+                    this.x > blocksArray[i].x &&
+                    this.x < blocksArray[i].x + blocksArray[i].scale) {
+                    this.collide(this.x, blocksArray[i].y);
+                    this.collided = true;
+                    break;
+                }
+            }
+            if (!this.collided) {
+                for (var j = 0; j * blocksArray[i].scale + this.prevX < this.x; j++) {
+                    if (this.y > blocksArray[i].y &&
+                        this.y < blocksArray[i].y + blocksArray[i].scale &&
+                        j * blocksArray[i].scale + this.prevX > blocksArray[i].x &&
+                        j * blocksArray[i].scale + this.prevX < blocksArray[i].x + blocksArray[i].scale) {
+                        this.collide(this.x, blocksArray[i].y);
+                        this.collided = true;
+                        break;
+                        // console.log("collided!")
+                    }
+
+                }
             }
         }
     }
 
 
+
     this.collide = function(x, y) {
-        splash = new Splash(this.fallspeed, x, y, wind, y);
+        splash = new Splash(this.fallspeed, x, y, -wind, y);
         this.y = random(-sizeY);
         this.fallspeed = random(5, 50);
         this.x = random((-sizeX * 0.5), sizeX * 1.5);
@@ -43,7 +67,7 @@ function Raindrop() {
         strokeWeight(1 * (this.fallspeed * 0.025));
         // stroke(random(0,255),random(0,255),random(0,255));
         stroke(dropColor[0], dropColor[1], dropColor[2]);
-        line(this.x, this.y, this.x + wind, this.y + this.length);
+        line(this.x, this.y, this.x - wind, this.y - this.length);
         try {
             if (splash != 'undefined' && splash.checkY()) {
                 splash.show()
