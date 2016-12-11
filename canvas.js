@@ -16,8 +16,22 @@ function setup() {
     gravitySlider = createSlider(0, 10, .1, .01);
     sizeSlider = createSlider(1, 64, 16, 1);
     sizeY = $(window).height();
+    copyDiv = createInput(0,0,sizeX, 64);
+    copyDiv.style('background-color' ,'#BDBDBD');
+    copyDiv.style('color' ,'black');
+    copyDiv.style('text-align','center');
+    copyDiv.style('border','0');
+    copyDiv.style('width','100%');
+    copyDiv.style('height','32px');
+    copyDiv.style('font-family','sans-serif')
+    copyDiv.mousePressed(saveDrawingToString);
+    copyDiv.changed(setNewDrawing);
+    copyDiv.value('Click me to generate a link of your drawing. Paste text in me from other people, then press enter to view their drawings!');
 
-    createCanvas(sizeX, sizeY);
+
+    createCanvas(sizeX, sizeY - 32);
+    translate(0,16);
+
     // frameRate(4)
 
     for (var i = 0; i < count; i++) {
@@ -25,13 +39,35 @@ function setup() {
     }
 }
 
-function mousePressed() {
-    // dropColor[0] = random(20, 255);
-    // dropColor[1] = random(20, 255);
-    // dropColor[2] = random(20, 255);
 
+function saveDrawingToString() {
+  var temp = []
+
+  for (var i = 0; i < blocksArray.length; i++){
+    var s = "";
+    s += blocksArray[i].x + ",";
+    s += blocksArray[i].y + ",";
+    s += blocksArray[i].scale + "--";
+    temp.push(s);
+  }
+  copyDiv.value(temp.join(''));
 }
 
+function setNewDrawing() {
+  try {
+    var newDrawingString = copyDiv.value();
+    for (var i = blocksArray.length - 1; i >= 0; i--) {
+      blocksArray.splice(i, 1);
+    }
+    var temp = newDrawingString.split('--');
+    for (var i = 0; i < temp.length; i++){
+      var sections = temp[i].split(',');
+      blocksArray.push(new Block(sections[0], sections[1], sections[2], color(random(255),random(255),random(255))));
+    }
+  } catch(err){
+    copyDiv.value("Oh no! Something went wrong! you fucked it ;d");
+  }
+}
 
 function draw() {
     slider.position((sizeX / 8) * 3, sizeY - (sizeY / 6));
@@ -133,4 +169,6 @@ function draw() {
         raindrops[i].show();
         // raindrops[i].log();
     }
+
+
 }
