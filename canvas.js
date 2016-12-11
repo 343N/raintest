@@ -77,19 +77,19 @@ function draw() {
         }
         if (mouseX > gravitySlider.position().x &&
             mouseX < gravitySlider.position().x + gravitySlider.size().width &&
-            mouseY > gravitySlider.position().y &&
-            mouseY < gravitySlider.position().y + gravitySlider.size().width) {
+            mouseY > gravitySlider.position().y - (slider.size().height * .5) &&
+            mouseY < gravitySlider.position().y + (gravitySlider.size().height * 1.5)) {
             console.log('a');
             spaceIsAlreadyOccupied = true;
         } else if (mouseX > sizeSlider.position().x &&
             mouseX < sizeSlider.position().x + sizeSlider.size().width &&
-            mouseY > sizeSlider.position().y &&
-            mouseY < sizeSlider.position().y + sizeSlider.size().width) {
+            mouseY > sizeSlider.position().y - (slider.size().height * .5) &&
+            mouseY < sizeSlider.position().y + (sizeSlider.size().height * 1.5)) {
             spaceIsAlreadyOccupied = true;
         } else if (mouseX > slider.position().x &&
             mouseX < slider.position().x + slider.size().width &&
-            mouseY > slider.position().y &&
-            mouseY < slider.position().y + slider.size().width) {
+            mouseY > slider.position().y - (slider.size().height * .5) &&
+            mouseY < slider.position().y + (slider.size().height * 1.5)) {
             spaceIsAlreadyOccupied = true;
         }
         if (!spaceIsAlreadyOccupied) {
