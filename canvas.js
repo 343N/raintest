@@ -66,9 +66,9 @@ function saveDrawingToString() {
 function setNewDrawing() {
   try {
     var newDrawingString = atob(copyDiv.value());
-    // for (var i = blocksArray.length - 1; i >= 0; i--) {
-    //   blocksArray.splice(0, 1);
-    // }
+    for (var i = blocksArray.length - 1; i >= 0; i--) {
+      blocksArray.splice(0, 1);
+    }
     var temp = newDrawingString.split('--');
     console.log(temp);
     for (var i = 0; i < temp.length; i++){
