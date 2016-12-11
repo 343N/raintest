@@ -111,7 +111,7 @@ function draw() {
                 spaceIsAlreadyOccupied = true;
             }
         }
-        if (mouseY < 32) {
+        if (mouseY < 64) {
           spaceIsAlreadyOccupied = true;
         }
         if (mouseX > gravitySlider.position().x &&
