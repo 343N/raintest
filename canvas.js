@@ -5,6 +5,8 @@ var slider;
 var lightning;
 var opacity = 255;
 var branches;
+var blocksArray = [];
+var blockScale = 16;
 
 function setup() {
   sizeX = $(window).width();
@@ -23,9 +25,10 @@ function setup() {
 }
 
 function mousePressed() {
-  dropColor[0] = random(20, 255);
-  dropColor[1] = random(20, 255);
-  dropColor[2] = random(20, 255);
+  // dropColor[0] = random(20, 255);
+  // dropColor[1] = random(20, 255);
+  // dropColor[2] = random(20, 255);
+
 }
 
 
@@ -52,6 +55,25 @@ function draw(){
 
   text("Gravity: " + Math.round(gravitySlider.value() * 100) /100, (sizeX / 8), sizeY - (sizeY/10));
 
+  if (mouseIsPressed) {
+    var x = mouseX % blockScale;
+    x = mouseX - x;
+    var y = mouseY % blockScale;
+    y = mouseY - y;
+
+    var spaceIsAlreadyOccupied = false;
+    for (var i = 0; i < blocksArray.length; i++) {
+      if (blocksArray[i].x == x && blocksArray[i].y == y) {
+        spaceIsAlreadyOccupied = true;
+      }
+    }
+    if (!spaceIsAlreadyOccupied) {
+      blocksArray.push(new Block(x, y, blockScale, color(random(255),random(255),random(255))));
+      // console.log(y);
+      // console.log(x);
+    }
+  }
+
   try{
     if (random(1) < ((count/initialCount)/20)) {
       lightning = new Lightning(sizeX, sizeY);
@@ -77,6 +99,9 @@ function draw(){
     // console.log(err);
   }
 
+  for (var i = 0; i < blocksArray.length; i++){
+    blocksArray[i].show();
+  }
 
   for (var i = 0; i < count; i++) {
     raindrops[i].fall();

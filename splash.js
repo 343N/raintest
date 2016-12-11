@@ -1,6 +1,7 @@
-function Splash(size, x, y, wind) {
+function Splash(size, x, y, wind, limit) {
 
     bottom = y;
+    this.cutoff = limit;
     this.y = y;
     this.x = x;
     this.fallspeed = -(size + wind) * random(.25);
@@ -12,7 +13,7 @@ function Splash(size, x, y, wind) {
     //
     // }
     this.checkY = function() {
-        if (this.y < bottom) {
+        if (this.y < limit) {
             return true
         } else return false;
     }
