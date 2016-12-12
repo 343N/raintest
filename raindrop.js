@@ -71,9 +71,9 @@ function Raindrop() {
 
 
     this.show = function() {
-        strokeWeight(1 * (this.fallspeed * 0.025));
         // stroke(random(0,255),random(0,255),random(0,255));
         stroke(dropColor[0], dropColor[1], dropColor[2]);
+        strokeWeight(1 * (this.fallspeed * 0.025));
         line(this.x, this.y, this.x - wind, this.y - this.length);
         try {
             if (splash != 'undefined' && splash.checkY()) {
