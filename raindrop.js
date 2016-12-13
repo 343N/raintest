@@ -27,31 +27,33 @@ function Raindrop() {
             this.collide(this.x, sizeY);
             this.collided = true;
         }
-        for (var i = 0; i < blocksArray.length; i++) {
-            for (var j = 0; j * blocksArray[i].scale + this.prevY < this.newY; j++) {
-                if (j * blocksArray[i].scale + this.prevY > blocksArray[i].y &&
-                    j * blocksArray[i].scale + this.prevY < blocksArray[i].y + blocksArray[i].scale &&
-                    this.newX > blocksArray[i].x &&
-                    this.newX < blocksArray[i].x + blocksArray[i].scale) {
-                    this.collide(this.newX , blocksArray[i].y);
-                    this.collided = true;
-                    break;
-                }
-            }
-            if (!this.collided) {
-                for (var j = 0; j * blocksArray[i].scale + this.prevX < this.newX; j++) {
-                    if (this.newY > blocksArray[i].y &&
-                        this.newY < blocksArray[i].y + blocksArray[i].scale &&
-                        j * blocksArray[i].scale + this.prevX > blocksArray[i].x &&
-                        j * blocksArray[i].scale + this.prevX < blocksArray[i].x + blocksArray[i].scale) {
-                        this.collide(blocksArray[i].x, this.newY); //+ (j * blocksArray[i].scale) );
-                        this.collided = true;
-                        break;
-                        // console.log("collided!")
-                    }
+        if (collisionEnabled){
+          for (var i = 0; i < blocksArray.length; i++) {
+              for (var j = 0; j * blocksArray[i].scale + this.prevY < this.newY; j++) {
+                  if (j * blocksArray[i].scale + this.prevY > blocksArray[i].y &&
+                      j * blocksArray[i].scale + this.prevY < blocksArray[i].y + blocksArray[i].scale &&
+                      this.newX > blocksArray[i].x &&
+                      this.newX < blocksArray[i].x + blocksArray[i].scale) {
+                      this.collide(this.newX , blocksArray[i].y);
+                      this.collided = true;
+                      break;
+                  }
+              }
+              if (!this.collided) {
+                  for (var j = 0; j * blocksArray[i].scale + this.prevX < this.newX; j++) {
+                      if (this.newY > blocksArray[i].y &&
+                          this.newY < blocksArray[i].y + blocksArray[i].scale &&
+                          j * blocksArray[i].scale + this.prevX > blocksArray[i].x &&
+                          j * blocksArray[i].scale + this.prevX < blocksArray[i].x + blocksArray[i].scale) {
+                          this.collide(blocksArray[i].x, this.newY); //+ (j * blocksArray[i].scale) );
+                          this.collided = true;
+                          break;
+                          // console.log("collided!")
+                      }
 
-                }
-            }
+                  }
+              }
+          }
         }
         if (!this.collided) {
           this.x = this.newX;

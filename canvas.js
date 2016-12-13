@@ -1,5 +1,7 @@
 var raindrops = [];
+var collisionEnabled = true;
 var limit = false;
+var collisionCheckbox;
 var count = 0;
 var slider;
 var lightning;
@@ -28,7 +30,8 @@ function setup() {
     copyDiv.mousePressed(saveDrawingToString);
     copyDiv.changed(setNewDrawing);
     copyDiv.value('Click me to generate a link of your drawing. Paste text in me from other people, then press enter to view their drawings or clear your own!');
-
+    collisionCheckbox = createCheckbox('Enable Collision', true);
+    collisionCheckbox.changed(toggleCollision);
     createCanvas(sizeX, sizeY - 32);
     translate(0, 16);
 
@@ -37,6 +40,14 @@ function setup() {
     for (var i = 0; i < count; i++) {
         raindrops.push(new Raindrop);
     }
+}
+
+function toggleCollision(){
+  if (this.checked()) {
+    collisionEnabled = true;
+  } else {
+    collisionEnabled = false;
+  }
 }
 
 
@@ -110,6 +121,9 @@ function draw() {
     sizeSlider.position((sizeX / 3) * 2, sizeY - (sizeY / 6));
     sizeSlider.size((sizeX / 8) * 1);
 
+    collisionCheckbox.position((sizeX / 8) * 7, sizeY - (sizeY / 6));
+    collisionCheckbox.size(20,20);
+
     gravitySlider.position((sizeX / 8), sizeY - (sizeY / 6));
     gravitySlider.size((sizeX / 8));
 
@@ -130,6 +144,7 @@ function draw() {
     text("Raindrop Count: " + Math.round(slider.value()), (sizeX / 8) * 3, sizeY - (sizeY / 10));
     text("Brush size: " + Math.round(sizeSlider.value()) + " px", (sizeX / 3) * 2, sizeY - (sizeY / 10));
     text("Gravity: " + Math.round(gravitySlider.value() * 100) / 100, (sizeX / 8), sizeY - (sizeY / 10));
+    // text("Collision: " + collisionEnabled, (sizeX/8)*7, sizeY - (sizeY / 6));
 
     // console.log(gravitySlider.mouseOver());
     if (mouseIsPressed) {
