@@ -10,6 +10,11 @@ var branches;
 var blocksArray = [];
 var blockScale = 16;
 var dontDelete = false;
+var colFirstBlock = true;
+var colMinX;
+var colMaxX;
+var colMinY;
+var colMaxY;
 
 function setup() {
     sizeX = $(window).width();
@@ -42,12 +47,12 @@ function setup() {
     }
 }
 
-function toggleCollision(){
-  if (this.checked()) {
-    collisionEnabled = true;
-  } else {
-    collisionEnabled = false;
-  }
+function toggleCollision() {
+    if (this.checked()) {
+        collisionEnabled = true;
+    } else {
+        collisionEnabled = false;
+    }
 }
 
 
@@ -80,12 +85,35 @@ function setNewDrawing() {
         for (var i = blocksArray.length - 1; i >= 0; i--) {
             blocksArray.splice(0, 1);
         }
+        colFirstBlock = true;
         var temp = newDrawingString.split('--');
         console.log(temp);
         for (var i = 0; i < temp.length; i++) {
             var sections = temp[i].split(',');
             console.log(sections);
-            blocksArray.push(new Block(parseInt(sections[0]), parseInt(sections[1]), parseInt(sections[2]), color(random(255), random(255), random(255))));
+            x = parseInt(sections[0]);
+            y = parseInt(sections[1]);
+            blockScale = parseInt(sections[2]);
+            blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
+            if (colFirstBlock){
+              colMinX = x;
+              colMinY = y;
+              colMaxX = x + blockScale;
+              colMaxY = y + blockScale;
+              colFirstBlock = false;
+            }
+            if (x < colMinX){
+              colMinX = x;
+            }
+            if (y < colMinY){
+              colMinY = y;
+            }
+            if (x + blockScale > colMaxX){
+              colMaxX = x + blockScale;
+            }
+            if (y + blockScale > colMaxY){
+              colMaxY = y + blockScale;
+            }
         }
     } catch (err) {
         copyDiv.value("Oh no! Something went wrong! you fucked it ;d");
@@ -93,7 +121,7 @@ function setNewDrawing() {
 }
 
 function mouseClicked() {
-    for (var i = 0; i < blocksArray.length ; i++) {
+    for (var i = 0; i < blocksArray.length; i++) {
         if (mouseX > blocksArray[i].x &&
             mouseX < blocksArray[i].x + blocksArray[i].scale &&
             mouseY > blocksArray[i].y &&
@@ -122,7 +150,7 @@ function draw() {
     sizeSlider.size((sizeX / 8) * 1);
 
     collisionCheckbox.position((sizeX / 8) * 7, sizeY - (sizeY / 6));
-    collisionCheckbox.size(20,20);
+    collisionCheckbox.size(20, 20);
 
     gravitySlider.position((sizeX / 8), sizeY - (sizeY / 6));
     gravitySlider.size((sizeX / 8));
@@ -144,6 +172,7 @@ function draw() {
     text("Raindrop Count: " + Math.round(slider.value()), (sizeX / 8) * 3, sizeY - (sizeY / 10));
     text("Brush size: " + Math.round(sizeSlider.value()) + " px", (sizeX / 3) * 2, sizeY - (sizeY / 10));
     text("Gravity: " + Math.round(gravitySlider.value() * 100) / 100, (sizeX / 8), sizeY - (sizeY / 10));
+    text("FPS: " + Math.floor(frameRate()), 0, height - 16);
     // text("Collision: " + collisionEnabled, (sizeX/8)*7, sizeY - (sizeY / 6));
 
     // console.log(gravitySlider.mouseOver());
@@ -159,73 +188,92 @@ function draw() {
         // if (blocksArray[i].x == x && blocksArray[i].y == y) {
         //
         // }
-    for (var i = 0; i < blocksArray.length; i++) {
-          if (y === blocksArray[i].y && x === blocksArray[i].x) {
-              spaceIsAlreadyOccupied = true;
-              break;
-          }
-    }
-    if (mouseX > gravitySlider.position().x &&
-      mouseX < gravitySlider.position().x + gravitySlider.size().width &&
-      mouseY > gravitySlider.position().y - (slider.size().height * .5) &&
-      mouseY < gravitySlider.position().y + (gravitySlider.size().height * 1.5)) {
-      console.log('a');
-      spaceIsAlreadyOccupied = true;
-  } else if (mouseX > sizeSlider.position().x &&
-      mouseX < sizeSlider.position().x + sizeSlider.size().width &&
-      mouseY > sizeSlider.position().y - (slider.size().height * .5) &&
-      mouseY < sizeSlider.position().y + (sizeSlider.size().height * 1.5)) {
-      spaceIsAlreadyOccupied = true;
-  } else if (mouseX > slider.position().x &&
-      mouseX < slider.position().x + slider.size().width &&
-      mouseY > slider.position().y - (slider.size().height * .5) &&
-      mouseY < slider.position().y + (slider.size().height * 1.5)) {
-      spaceIsAlreadyOccupied = true;
-  }
-    if (mouseY < 8) {
-        spaceIsAlreadyOccupied = true;
-    }
+        for (var i = 0; i < blocksArray.length; i++) {
+            if (y === blocksArray[i].y && x === blocksArray[i].x) {
+                spaceIsAlreadyOccupied = true;
+                break;
+            }
+        }
+        if (mouseX > gravitySlider.position().x &&
+            mouseX < gravitySlider.position().x + gravitySlider.size().width &&
+            mouseY > gravitySlider.position().y - (slider.size().height * .5) &&
+            mouseY < gravitySlider.position().y + (gravitySlider.size().height * 1.5)) {
+            console.log('a');
+            spaceIsAlreadyOccupied = true;
+        } else if (mouseX > sizeSlider.position().x &&
+            mouseX < sizeSlider.position().x + sizeSlider.size().width &&
+            mouseY > sizeSlider.position().y - (slider.size().height * .5) &&
+            mouseY < sizeSlider.position().y + (sizeSlider.size().height * 1.5)) {
+            spaceIsAlreadyOccupied = true;
+        } else if (mouseX > slider.position().x &&
+            mouseX < slider.position().x + slider.size().width &&
+            mouseY > slider.position().y - (slider.size().height * .5) &&
+            mouseY < slider.position().y + (slider.size().height * 1.5)) {
+            spaceIsAlreadyOccupied = true;
+        }
+        if (mouseY < 8) {
+            spaceIsAlreadyOccupied = true;
+        }
 
-    if (!spaceIsAlreadyOccupied) {
-      dontDelete = true;
-      blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
-        // console.log(y);
-        // console.log(x);
-    }
-}
-
-try {
-    if (random(1) < ((count / initialCount) / 20)) {
-        lightning = new Lightning(sizeX, sizeY);
-        opacity = 255;
-        // console.log("tried showing branches");
-
-    }
-    if (opacity > 0) {
-        for (var i = 0; i < lightning.oldEndsX().length; i++) {
-            stroke(125, 249, 255, opacity);
-            // strokeWidth(1);
-            line(lightning.oldEndsX()[i],
-                lightning.oldEndsY()[i],
-                lightning.newEndsX()[i],
-                lightning.newEndsY()[i]);
-            opacity -= .05;
+        if (!spaceIsAlreadyOccupied) {
+            dontDelete = true;
+            blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
+            if (colFirstBlock){
+              colMinX = x;
+              colMinY = y;
+              colMaxX = x + blockScale;
+              colMaxY = y + blockScale;
+              colFirstBlock = false;
+            }
+            if (x < colMinX){
+              colMinX = x;
+            }
+            if (y < colMinY){
+              colMinY = y;
+            }
+            if (x + blockScale > colMaxX){
+              colMaxX = x + blockScale;
+            }
+            if (y + blockScale > colMaxY){
+              colMaxY = y + blockScale;
+            }
+            // console.log(y);
+            // console.log(x);
         }
     }
 
-    // lightning.show()
+    try {
+        if (random(1) < ((count / initialCount) / 20)) {
+            lightning = new Lightning(sizeX, sizeY);
+            opacity = 255;
+            // console.log("tried showing branches");
 
-} catch (err) {
-    // console.log(err);
-}
+        }
+        if (opacity > 0) {
+            for (var i = 0; i < lightning.oldEndsX().length; i++) {
+                stroke(125, 249, 255, opacity);
+                // strokeWidth(1);
+                line(lightning.oldEndsX()[i],
+                    lightning.oldEndsY()[i],
+                    lightning.newEndsX()[i],
+                    lightning.newEndsY()[i]);
+                opacity -= .05;
+            }
+        }
 
-for (var i = 0; i < blocksArray.length; i++) {
-    blocksArray[i].show();
-}
+        // lightning.show()
 
-for (var i = 0; i < count; i++) {
-    raindrops[i].fall();
-    raindrops[i].show();
-    // raindrops[i].log();
-}
+    } catch (err) {
+        // console.log(err);
+    }
+
+    for (var i = 0; i < blocksArray.length; i++) {
+        blocksArray[i].show();
+    }
+
+    for (var i = 0; i < count; i++) {
+        raindrops[i].fall();
+        raindrops[i].show();
+        // raindrops[i].log();
+    }
 }
