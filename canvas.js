@@ -11,40 +11,79 @@ var blocksArray = [];
 var blockScale = 16;
 var dontDelete = false;
 var colFirstBlock = true;
-var colMinX;
-var colMaxX;
-var colMinY;
-var colMaxY;
+var menuDiv;
+var menuOpened = false;
+var colMinX, colMaxX, colMinY, colMaxY;
+var db, nameInput;
+var allEntries;
 
 function setup() {
+    var config = {
+        apiKey: "AIzaSyDTP7GQiYO2S9pmwEudzUOfVOhCGMsk6fM",
+        authDomain: "rain-test-drawings.firebaseapp.com",
+        databaseURL: "https://rain-test-drawings.firebaseio.com",
+        storageBucket: "rain-test-drawings.appspot.com",
+        messagingSenderId: "429023551339"
+    };
+    firebase.initializeApp(config);
+    db = firebase.database();
     sizeX = $(window).width();
+    sizeY = $(window).height();
+    createCanvas(sizeX, sizeY - 40);
     initialCount = sizeX * 4;
     count = sizeX * 4;
     slider = createSlider(0, sizeX * 4, sizeX / 8);
     gravitySlider = createSlider(0, 10, .1, .01);
     sizeSlider = createSlider(1, 64, 16, 1);
-    sizeY = $(window).height();
-    copyDiv = createInput(0, 0, sizeX, 64);
-    copyDiv.style('background-color', '#BDBDBD');
-    copyDiv.style('color', 'black');
-    copyDiv.style('text-align', 'center');
-    copyDiv.style('border', '0');
-    copyDiv.style('width', '100%');
-    copyDiv.style('height', '32px');
-    copyDiv.style('font-family', 'sans-serif')
-    copyDiv.mousePressed(saveDrawingToString);
-    copyDiv.changed(setNewDrawing);
-    copyDiv.value('Click me to generate a link of your drawing. Paste text in me from other people, then press enter to view their drawings or clear your own!');
+    fillerDiv = createDiv();
+    fillerDiv.id('fillerDiv');
+    fillerDiv.html('');
+    clearButton = createDiv();
+    clearButton.id('clearButton');
+    clearButton.html('Clear Drawing');
+    clearButton.mouseClicked(clearDrawing);
+    menuButton = createDiv();
+    menuButton.id('menuButton');
+    menuButton.html('Menu');
+    menuButton.mouseClicked(toggleMenu);
+    menuDiv = createDiv();
+    saveButton = createDiv();
+    saveButton.id('saveButton');
+    saveButton.mouseClicked(saveDrawing);
+    saveButton.html(`Save drawing as`);
+    nameInput = createInput();
+    nameInput.id('nameInput');
+
+    // menuDiv.mouseClicked();
+    menuDiv.html('');
+    menuDiv.id('menuDiv');
+    saveButton.parent('#menuDiv');
+    nameInput.parent('#menuDiv');
+    // copyDiv = createDiv(0, 0, sizeX, 64);
+    // copyDiv.style('background-color', '#BDBDBD');
+    // copyDiv.style('color', 'black');
+    // copyDiv.style('text-align', 'center');
+    // copyDiv.style('border', '0');
+    // copyDiv.style('width', '100%');
+    // copyDiv.style('height', '32px');
+    // copyDiv.style('font-family', 'sans-serif')
+    // copyDiv.mousePressed(saveDrawingToString);
+    // copyDiv.changed(setNewDrawing);
+    // copyDiv.html('Clear drawing.');
     collisionCheckbox = createCheckbox('Enable Collision', true);
     collisionCheckbox.changed(toggleCollision);
-    createCanvas(sizeX, sizeY - 32);
-    translate(0, 16);
+    // translate(0,);
 
     // frameRate(4)
 
     for (var i = 0; i < count; i++) {
         raindrops.push(new Raindrop);
     }
+}
+
+function clearDrawing() {
+    blocksArray = [];
+    if (menuOpened) toggleMenu();
 }
 
 function toggleCollision() {
@@ -55,8 +94,18 @@ function toggleCollision() {
     }
 }
 
+function toggleMenu() {
+    if (menuOpened) {
+        menuDiv.style('left', '-20%')
+        menuOpened = false;
+    } else {
+        menuDiv.style('left', '0')
+        refreshList();
+        menuOpened = true;
+    }
+}
 
-function saveDrawingToString() {
+function saveDrawing() {
     var temp = []
 
     for (var i = 0; i < blocksArray.length; i++) {
@@ -75,48 +124,116 @@ function saveDrawingToString() {
     }
     // console.log(temp);
     // console.log(temp.join('').split('--'));
-    copyDiv.value(btoa(temp.join('')));
+    var savedString = btoa(temp.join(''));
+    var name = nameInput.value();
+    db.ref('drawings').push({
+        drawingName: name,
+        drawingData: savedString
+    });
+    refreshList();
 
 }
 
-function setNewDrawing() {
-    try {
-        var newDrawingString = atob(copyDiv.value());
-        for (var i = blocksArray.length - 1; i >= 0; i--) {
-            blocksArray.splice(0, 1);
+function refreshList() {
+    db.ref('drawings').once('value', dataRetrieved, errData);
+    if (select('#error')) select('#error').remove();
+    var contE = selectAll('.drawingEntryContainer');
+    for (var i = 0; i < contE.length; i++) {
+        // console.log(keysArray);
+        // elmts[i].remove();
+        contE[i].remove();
+    }
+    var loadingDiv = createDiv('Loading...');
+    loadingDiv.parent('#menuDiv');
+    loadingDiv.style('font-size','1.2vw');
+
+    function dataRetrieved(data) {
+        console.log(data.val());
+        if (data.val() === null) {
+            loadingDiv.html(`There's no drawings yet!`);
+
+            loadingDiv.id('error');
+            console.log('UNDEFINED!')
+        } else {
+            var allDrawings = data.val();
+            var keysArray = Object.keys(allDrawings);
+            // var allEntries = [];
+            // data.val();
+            // var elmts = selectAll('.drawingEntry');
+
+            loadingDiv.remove();
+            for (var i = 0; i < keysArray.length; i++) {
+                var key = keysArray[i];
+                var name = allDrawings[key].drawingName;
+                var drawingData = allDrawings[key].drawingData;
+                // console.log(drawingData);
+                var entryContainer = createDiv(name);
+                entryContainer.parent('#menuDiv');
+                entryContainer.class('drawingEntryContainer');
+                // var entry = createP(name)
+                // entry.class('.drawingEntry');
+                // entry.parent(entryContainer);
+                createDrawingListing(entryContainer, drawingData);
+            }
         }
+    }
+
+    function errData() {
+        console.log(err);
+    }
+}
+
+function createDrawingListing(element, data) {
+    element.mouseClicked(function() {
+        setNewDrawing(data);
+        // toggleMenu();
+    });
+}
+
+function setNewDrawing(data) {
+    try {
+        clearDrawing();
+        var newDrawingString = atob(data);
+        // aotb(data);
+        // console.log(newDrawingString);
+        console.log(data);
+        console.log(newDrawingString);
         colFirstBlock = true;
         var temp = newDrawingString.split('--');
         console.log(temp);
+        // console.log(temp[0]);
         for (var i = 0; i < temp.length; i++) {
             var sections = temp[i].split(',');
-            console.log(sections);
+            // console.log(sections);
             x = parseInt(sections[0]);
             y = parseInt(sections[1]);
             blockScale = parseInt(sections[2]);
             blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
-            if (colFirstBlock){
-              colMinX = x;
-              colMinY = y;
-              colMaxX = x + blockScale;
-              colMaxY = y + blockScale;
-              colFirstBlock = false;
+            if (colFirstBlock) {
+                colMinX = x;
+                colMinY = y;
+                colMaxX = x + blockScale;
+                colMaxY = y + blockScale;
+                colFirstBlock = false;
             }
-            if (x < colMinX){
-              colMinX = x;
+            if (x < colMinX) {
+                colMinX = x;
             }
-            if (y < colMinY){
-              colMinY = y;
+            if (y < colMinY) {
+                colMinY = y;
             }
-            if (x + blockScale > colMaxX){
-              colMaxX = x + blockScale;
+            if (x + blockScale > colMaxX) {
+                colMaxX = x + blockScale;
             }
-            if (y + blockScale > colMaxY){
-              colMaxY = y + blockScale;
+            if (y + blockScale > colMaxY) {
+                colMaxY = y + blockScale;
             }
         }
+        // console.log(temp)
+
     } catch (err) {
-        copyDiv.value("Oh no! Something went wrong! you fucked it ;d");
+        // copyDiv.value("Oh no! Something went wrong! you fucked it ;d");
+        console.log("ERROR! \n" + err);
     }
 }
 
@@ -143,7 +260,12 @@ function mouseClicked() {
 
 }
 
+function setHeight() {
+    menuDiv.style('height', (height) + 'px');
+}
+
 function draw() {
+
     slider.position((sizeX / 8) * 3, sizeY - (sizeY / 6));
     slider.size((sizeX / 8) * 2);
     sizeSlider.position((sizeX / 3) * 2, sizeY - (sizeY / 6));
@@ -154,7 +276,6 @@ function draw() {
 
     gravitySlider.position((sizeX / 8), sizeY - (sizeY / 6));
     gravitySlider.size((sizeX / 8));
-
     // textposition((sizeX / 8) * 3, sizeY - (sizeY/7));
     // textAlign(CENTER);
     sizeX = $(window).width();
@@ -165,13 +286,13 @@ function draw() {
     wind = (mouseX - (sizeX / 2)) / (sizeX / 2) * 10;
     wind = -wind
     blockScale = sizeSlider.value()
-
+    setHeight();
     // fill(0);
     textSize(16);
     stroke(255);
-    text("Raindrop Count: " + Math.round(slider.value()), (sizeX / 8) * 3, sizeY - (sizeY / 10));
-    text("Brush size: " + Math.round(sizeSlider.value()) + " px", (sizeX / 3) * 2, sizeY - (sizeY / 10));
-    text("Gravity: " + Math.round(gravitySlider.value() * 100) / 100, (sizeX / 8), sizeY - (sizeY / 10));
+    text("Raindrop Count: " + Math.round(slider.value()), (sizeX / 8) * 3, sizeY - (sizeY / 7));
+    text("Brush size: " + Math.round(sizeSlider.value()) + " px", (sizeX / 3) * 2, sizeY - (sizeY / 7));
+    text("Gravity: " + Math.round(gravitySlider.value() * 100) / 100, (sizeX / 8), sizeY - (sizeY / 7));
     text("FPS: " + Math.floor(frameRate()), 0, height - 16);
     // text("Collision: " + collisionEnabled, (sizeX/8)*7, sizeY - (sizeY / 6));
 
@@ -218,24 +339,24 @@ function draw() {
         if (!spaceIsAlreadyOccupied) {
             dontDelete = true;
             blocksArray.push(new Block(x, y, blockScale, color(random(255), random(255), random(255))));
-            if (colFirstBlock){
-              colMinX = x;
-              colMinY = y;
-              colMaxX = x + blockScale;
-              colMaxY = y + blockScale;
-              colFirstBlock = false;
+            if (colFirstBlock) {
+                colMinX = x;
+                colMinY = y;
+                colMaxX = x + blockScale;
+                colMaxY = y + blockScale;
+                colFirstBlock = false;
             }
-            if (x < colMinX){
-              colMinX = x;
+            if (x < colMinX) {
+                colMinX = x;
             }
-            if (y < colMinY){
-              colMinY = y;
+            if (y < colMinY) {
+                colMinY = y;
             }
-            if (x + blockScale > colMaxX){
-              colMaxX = x + blockScale;
+            if (x + blockScale > colMaxX) {
+                colMaxX = x + blockScale;
             }
-            if (y + blockScale > colMaxY){
-              colMaxY = y + blockScale;
+            if (y + blockScale > colMaxY) {
+                colMaxY = y + blockScale;
             }
             // console.log(y);
             // console.log(x);
