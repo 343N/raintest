@@ -51,7 +51,7 @@ function setup() {
     saveButton.id('saveButton');
     saveButton.mouseClicked(saveDrawing);
     saveButton.html(`Save drawing as`);
-    nameInput = createInput();
+    nameInput = createInput('Unnamed');
     nameInput.id('nameInput');
 
     // menuDiv.mouseClicked();
