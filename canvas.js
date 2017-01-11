@@ -29,7 +29,7 @@ function setup() {
     db = firebase.database();
     sizeX = $(window).width();
     sizeY = $(window).height();
-    createCanvas(sizeX, sizeY - 40);
+    createCanvas(sizeX, sizeY - 40, P2D);
     initialCount = sizeX * 4;
     count = sizeX * 4;
     slider = createSlider(0, sizeX * 4, sizeX / 8);
